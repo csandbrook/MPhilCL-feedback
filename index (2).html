@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Feedback — MPhil in Conservation Leadership</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f3;
+    color: #1a1a1a;
+    min-height: 100vh;
+    padding: 1.5rem 1rem 4rem;
+  }
+  .wrap { max-width: 600px; margin: 0 auto; }
+
+  h1 { font-size: 20px; font-weight: 600; line-height: 1.35; margin-bottom: 8px; color: #1a1a1a; }
+  .cohort-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+    color: #085041; background: #9FE1CB;
+    padding: 3px 10px; border-radius: 20px;
+    display: inline-block; margin-bottom: 12px;
+  }
+  .subtitle { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 1.25rem; }
+  .anon-note {
+    font-size: 12px; color: #777;
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 1.75rem;
+  }
+  .anon-note svg { flex-shrink: 0; }
+
+  .section-label { font-size: 13px; font-weight: 600; color: #444; margin-bottom: 8px; }
+  .module-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.75rem; }
+  .module-btn {
+    background: #fff; border: 1px solid #e0e0e0;
+    border-radius: 8px; padding: 12px 14px;
+    cursor: pointer; text-align: left;
+    font-family: inherit; transition: border-color 0.12s, background 0.12s;
+  }
+  .module-btn:hover { border-color: #aaa; background: #fafafa; }
+  .module-btn:focus { outline: 2px solid #1D9E75; outline-offset: 2px; }
+  .module-btn.selected { border: 1.5px solid #1D9E75; background: #E1F5EE; }
+  .module-code { font-size: 11px; font-weight: 700; color: #085041; margin-bottom: 3px; letter-spacing: 0.04em; }
+  .module-name { font-size: 12px; color: #333; line-height: 1.35; }
+
+  .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .filter-btn {
+    background: #fff; border: 1px solid #ddd;
+    border-radius: 20px; padding: 4px 13px;
+    font-size: 12px; cursor: pointer; color: #666;
+    font-family: inherit; transition: all 0.12s;
+  }
+  .filter-btn.active { background: #E1F5EE; border-color: #5DCAA5; color: #085041; font-weight: 500; }
+
+  .session-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 1.75rem; }
+  .session-btn {
+    background: #fff; border: 1px solid #e0e0e0;
+    border-radius: 8px; padding: 10px 14px;
+    cursor: pointer; text-align: left;
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; font-family: inherit;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .session-btn:hover { border-color: #aaa; background: #fafafa; }
+  .session-btn:focus { outline: 2px solid #1D9E75; outline-offset: 2px; }
+  .session-btn.selected { border: 1.5px solid #1D9E75; background: #E1F5EE; }
+  .session-btn.done { opacity: 0.5; }
+  .session-num { font-size: 11px; color: #999; min-width: 22px; flex-shrink: 0; }
+  .session-info { flex: 1; min-width: 0; }
+  .session-title { font-size: 13px; font-weight: 500; color: #1a1a1a; line-height: 1.35; }
+  .session-speaker { font-size: 12px; color: #666; margin-top: 2px; }
+  .done-badge {
+    font-size: 11px; color: #0F6E56; background: #9FE1CB;
+    padding: 2px 8px; border-radius: 20px;
+    white-space: nowrap; flex-shrink: 0; display: none;
+  }
+  .session-btn.done .done-badge { display: inline-block; }
+
+  .selected-display {
+    background: #E1F5EE; border: 1px solid #5DCAA5;
+    border-radius: 8px; padding: 10px 14px;
+    margin-bottom: 1.5rem; font-size: 13px; color: #085041;
+    display: none; line-height: 1.5;
+  }
+
+  .form-card {
+    background: #fff; border: 1px solid #e8e8e8;
+    border-radius: 10px; padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .form-card h2 { font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+  .hint { font-size: 12px; color: #888; margin-bottom: 12px; }
+
+  .stars { display: flex; gap: 6px; }
+  .star-btn {
+    background: none; border: 1px solid #ddd;
+    border-radius: 6px; width: 42px; height: 42px;
+    cursor: pointer; font-size: 16px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s; color: #888; font-family: inherit;
+  }
+  .star-btn:hover { border-color: #aaa; background: #f9f9f9; }
+  .star-btn:focus { outline: 2px solid #1D9E75; outline-offset: 2px; }
+  .star-btn.active { background: #FEF3C7; border-color: #F59E0B; color: #92400E; }
+  .star-label { font-size: 12px; color: #666; margin-top: 8px; min-height: 16px; }
+
+  textarea {
+    width: 100%; min-height: 80px; resize: vertical;
+    border: 1px solid #ddd; border-radius: 8px;
+    padding: 9px 12px; font-size: 13px; font-family: inherit;
+    color: #1a1a1a; background: #fafafa; line-height: 1.6;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { outline: none; border-color: #1D9E75; background: #fff; }
+
+  .submit-btn {
+    background: #1D9E75; color: white; border: none;
+    border-radius: 8px; padding: 13px 28px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    width: 100%; font-family: inherit; transition: background 0.15s;
+  }
+  .submit-btn:hover:not(:disabled) { background: #0F6E56; }
+  .submit-btn:focus { outline: 2px solid #1D9E75; outline-offset: 3px; }
+  .submit-btn:disabled { background: #f0f0f0; color: #aaa; cursor: not-allowed; border: 1px solid #e0e0e0; }
+  .submit-status { font-size: 12px; color: #666; text-align: center; margin-top: 8px; min-height: 16px; }
+  .submit-status.error { color: #c0392b; }
+
+  #success-view { display: none; text-align: center; padding: 4rem 1rem; }
+  .success-icon {
+    width: 60px; height: 60px; background: #E1F5EE; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+  }
+  #success-view h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+  #success-view p { font-size: 14px; color: #555; margin-bottom: 2rem; line-height: 1.6; }
+  .back-btn {
+    background: none; border: 1px solid #ddd; border-radius: 8px;
+    padding: 10px 22px; font-size: 14px; cursor: pointer;
+    color: #1a1a1a; font-family: inherit;
+  }
+  .back-btn:hover { border-color: #aaa; background: #f5f5f5; }
+  .empty-msg { font-size: 13px; color: #999; padding: 1rem 0; }
+  .divider { border: none; border-top: 1px solid #e8e8e8; margin: 1.5rem 0; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div id="main-view">
+    <div style="margin-bottom: 1.5rem;">
+      <div class="cohort-badge">Cohort 2026–27</div>
+      <h1>MPhil in Conservation Leadership — session feedback</h1>
+      <p class="subtitle">Select your module and session, then complete the three questions. Your responses are entirely anonymous — we cannot see who has rated which sessions.</p>
+      <div class="anon-note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Session tracking is stored only on your device — not sent to us
+      </div>
+    </div>
+
+    <div class="section-label">Step 1 — Select your module</div>
+    <div class="module-grid" id="module-grid"></div>
+
+    <div id="session-picker" style="display:none;">
+      <hr class="divider">
+      <div class="section-label" id="session-picker-label">Step 2 — Select your session</div>
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="setFilter('all', this)">All sessions</button>
+        <button class="filter-btn" onclick="setFilter('pending', this)">Not yet rated</button>
+        <button class="filter-btn" onclick="setFilter('done', this)">Already rated</button>
+      </div>
+      <div class="session-list" id="session-list" role="listbox" aria-label="Select a session"></div>
+    </div>
+
+    <div class="selected-display" id="selected-display" aria-live="polite"></div>
+
+    <div id="form-area" style="display:none;">
+      <div class="form-card">
+        <h2>How would you rate the overall quality of this session?</h2>
+        <p class="hint">1 = poor &nbsp;·&nbsp; 5 = excellent</p>
+        <div class="stars" id="stars" role="group" aria-label="Rating from 1 to 5"></div>
+        <div class="star-label" id="star-label" aria-live="polite"></div>
+      </div>
+      <div class="form-card">
+        <h2>What did you particularly like about this session?</h2>
+        <textarea id="q2" placeholder="What worked well, what was valuable..."></textarea>
+      </div>
+      <div class="form-card">
+        <h2>How could this session be improved in future?</h2>
+        <textarea id="q3" placeholder="Suggestions for the teaching team..."></textarea>
+      </div>
+      <button class="submit-btn" id="submit-btn" onclick="submitFeedback()" disabled>Submit feedback</button>
+      <div class="submit-status" id="submit-status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div id="success-view">
+    <div class="success-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>Feedback submitted</h2>
+    <p>Thank you — your response has been recorded anonymously<br>and will help us improve the course.</p>
+    <button class="back-btn" onclick="showMain()">Give feedback for another session</button>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ────────────────────────────────────────────────────────────────────
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypef7RAo25jWpNi7pxrg0GzwZs1e2X6zmNKy2yaNbrmhzWeUBHJFPpTMLKra1HAftUbg/exec";
+const COHORT = "2026-27";
+// ───────────────────────────────────────────────────────────────────────────────
+
+const MODULES = {
+  "CL101": {
+    label: "Conservation Leadership Problems and Practice",
+    sessions: [
+      { code: "CL101-01", id:  1, title: "What is conservation leadership?",                                          speaker: "Chris Sandbrook" },
+      { code: "CL101-02", id:  2, title: "Finding your way through the leadership jungle",                            speaker: "Howard Nelson" },
+      { code: "CL101-03", id:  3, title: "Leading beyond authority",                                                  speaker: "Alison Coburn" },
+      { code: "CL101-04", id:  4, title: "Context for organisational change",                                         speaker: "Jon Hutton" },
+      { code: "CL101-05", id:  5, title: "Pathways, politics and partnerships",                                       speaker: "Melissa Leach" },
+      { code: "CL101-06", id:  6, title: "Norfolk Broads field trip",                                                 speaker: "Chris Sandbrook & Howard Nelson" },
+      { code: "CL101-07", id:  7, title: "How science underpins conservation",                                        speaker: "Juliet Vickery" },
+      { code: "CL101-08", id:  8, title: "Past and future threats to biodiversity",                                   speaker: "Rob Fletcher" },
+      { code: "CL101-09", id:  9, title: "Feeding the world without costing the earth",                               speaker: "Andrew Balmford" },
+      { code: "CL101-10", id: 10, title: "The IUCN Red List: a scientific tool for conservation action",              speaker: "Caroline Pollock" },
+      { code: "CL101-11", id: 11, title: "Decolonising conservation",                                                 speaker: "Rosebell Abwonji & Trishant Simlai" },
+      { code: "CL101-12", id: 12, title: "The political ecology of conservation",                                     speaker: "Bhaskar Vira" },
+      { code: "CL101-13", id: 13, title: "Society, science and the policy interface",                                 speaker: "Andy Clements" },
+      { code: "CL101-14", id: 14, title: "Human wildlife conflict",                                                   speaker: "Trishant Simlai" },
+      { code: "CL101-15", id: 15, title: "Hotspot or hot air? Science, myth and conservation in Madagascar",          speaker: "Ivan Scales" },
+      { code: "CL101-16", id: 16, title: "How conservation and human rights interact",                                speaker: "Helen Tugendhat" },
+      { code: "CL101-17", id: 17, title: "ELSP",                                                                      speaker: "Berry Mulligan & David Thomas" },
+      { code: "CL101-18", id: 18, title: "Climate change policy",                                                     speaker: "Najma Mohamed" },
+      { code: "CL101-19", id: 19, title: "Module wrap-up",                                                            speaker: "Howard Nelson & Trishant Simlai" },
+    ]
+  },
+  "CL102": {
+    label: "Leading Self",
+    sessions: [
+      { code: "CL102-01", id: 1, title: "Personal welcome and exit meetings with the course team",                    speaker: "Chris Sandbrook, Howard Nelson & Trishant Simlai" },
+      { code: "CL102-02", id: 2, title: "Time management, resilience and wellbeing",                                  speaker: "Howard Nelson" },
+      { code: "CL102-03", id: 3, title: "Eco-anxiety and emotional intelligence",                                     speaker: "Annette Green & Alice Lawrence" },
+      { code: "CL102-04", id: 4, title: "Creating a thriving learning community",                                     speaker: "Nessie Reid" },
+      { code: "CL102-05", id: 5, title: "Conservation values",                                                        speaker: "Chris Sandbrook" },
+      { code: "CL102-06", id: 6, title: "Gender and conservation",                                                    speaker: "Karen Wong" },
+      { code: "CL102-07", id: 7, title: "Trust building within an organisation and maintaining trust",                speaker: "Martha Kimmel" },
+      { code: "CL102-08", id: 8, title: "Live and direct: voice and body as instruments of communication",            speaker: "Patrick Morris" },
+      { code: "CL102-09", id: 9, title: "Career coaching and job application skills",                                 speaker: "Nick Askew" },
+    ]
+  },
+  "CL103": {
+    label: "Leading People and Organisations",
+    sessions: [
+      { code: "CL103-01", id:  1, title: "Management across different sectors",                                       speaker: "Howard Nelson" },
+      { code: "CL103-02", id:  2, title: "Conservation monitoring and impacts",                                       speaker: "Ben Robinson" },
+      { code: "CL103-03", id:  3, title: "Designing and managing projects using log-frames",                          speaker: "Nick Folkard & Michaela Bútorová" },
+      { code: "CL103-04", id:  4, title: "Strategic planning in conservation organisations",                          speaker: "Marianne Carter" },
+      { code: "CL103-05", id:  5, title: "Successful fundraising for conservation bootcamp",                          speaker: "Pam Davis & Paula Marshall" },
+      { code: "CL103-06", id:  6, title: "Governance of organisations and responsibilities",                          speaker: "Mike Rands" },
+      { code: "CL103-07", id:  7, title: "Human resource management I: employment, motivation and efficiency",        speaker: "Sian Knott" },
+      { code: "CL103-08", id:  8, title: "Human resource management II: attracting skills to a conservation organisation", speaker: "Sian Knott" },
+      { code: "CL103-09", id:  9, title: "Grant writing for different funding sources",                               speaker: "Howard Nelson" },
+      { code: "CL103-10", id: 10, title: "Practical financial management",                                            speaker: "TBC" },
+      { code: "CL103-11", id: 11, title: "Conflict resolution",                                                       speaker: "Florencia Chiapero & Bobbi Hope" },
+      { code: "CL103-12", id: 12, title: "How to be effective in meetings",                                           speaker: "Neville Ash" },
+      { code: "CL103-13", id: 13, title: "Developing individuals and organisations",                                  speaker: "Mark Day & Erica Stewart-Jones" },
+      { code: "CL103-14", id: 14, title: "The role of grant making organisations in conservation",                    speaker: "Matthew Lewis, Yasemin Ulusoy & Lenke Bálint" },
+      { code: "CL103-15", id: 15, title: "Module wrap-up",                                                            speaker: "Howard Nelson" },
+    ]
+  },
+  "CL104": {
+    label: "Innovation for Conservation Leadership",
+    sessions: [
+      { code: "CL104-01", id: 1, title: "Introduction to CL104 and group innovation challenge",                       speaker: "Howard Nelson" },
+      { code: "CL104-02", id: 2, title: "Rethinking digital technologies for conservation",                           speaker: "Trishant Simlai" },
+      { code: "CL104-03", id: 3, title: "Green growth, degrowth and other economic models",                           speaker: "Erik Gomez-Baggethun" },
+      { code: "CL104-04", id: 4, title: "Innovating in systems and digital disruption for conservation",              speaker: "Gal Zanir" },
+      { code: "CL104-05", id: 5, title: "Evidence-based conservation and horizon scanning",                           speaker: "Bill Sutherland" },
+      { code: "CL104-06", id: 6, title: "Youth leadership in the conservation movement",                              speaker: "Jo Goodfellow & Rachael Griffiths" },
+      { code: "CL104-07", id: 7, title: "Social innovation: insights and relevance for conservation",                 speaker: "Lenke Bálint" },
+      { code: "CL104-08", id: 8, title: "Risk and opportunity: reducing biodiversity loss through influencing finance flows", speaker: "Frank Hawkins" },
+      { code: "CL104-09", id: 9, title: "Module wrap-up",                                                             speaker: "Howard Nelson & Trishant Simlai" },
+    ]
+  },
+  "CL105": {
+    label: "Leading Systems",
+    sessions: [
+      { code: "CL105-01", id:  1, title: "Module framing and introduction",                                           speaker: "Howard Nelson & Trishant Simlai" },
+      { code: "CL105-02", id:  2, title: "Systems thinking",                                                          speaker: "Martin Sandbrook" },
+      { code: "CL105-03", id:  3, title: "Financial instruments for conservation and incentive-based conservation",   speaker: "Chris Sandbrook" },
+      { code: "CL105-04", id:  4, title: "Sustainable use of wildlife: recreational hunting and ecotourism",          speaker: "Chloe Hodgkinson" },
+      { code: "CL105-05", id:  5, title: "Carbon finance",                                                            speaker: "David Coomes" },
+      { code: "CL105-06", id:  6, title: "Biodiversity finance",                                                      speaker: "Nina Seega" },
+      { code: "CL105-07", id:  7, title: "Micro-enterprise and conservation",                                         speaker: "Mrunmayee Amarnath & Rob Small" },
+      { code: "CL105-08", id:  8, title: "Accounting for natural capital: the role of biodiversity",                  speaker: "Bhaskar Vira" },
+      { code: "CL105-09", id:  9, title: "Valuing nature",                                                            speaker: "James Vause" },
+      { code: "CL105-10", id: 10, title: "Biodiversity and business: the private sector perspective",                 speaker: "Mike Barry" },
+      { code: "CL105-11", id: 11, title: "Biodiversity risk management",                                              speaker: "Leon Bennun" },
+      { code: "CL105-12", id: 12, title: "Framing nature workshop",                                                   speaker: "Ralph Underhill" },
+      { code: "CL105-13", id: 13, title: "Using behavioural insights for conservation",                               speaker: "Arjun Kamdar" },
+      { code: "CL105-14", id: 14, title: "Conservation and the media",                                                speaker: "Patrick Greenfield" },
+      { code: "CL105-15", id: 15, title: "Building an effective online narrative",                                    speaker: "Joshua Boyd & Annabelle Hawkes" },
+      { code: "CL105-16", id: 16, title: "Art, science and conservation",                                             speaker: "John Fanshawe" },
+      { code: "CL105-17", id: 17, title: "Making the most of a media interview",                                      speaker: "Susan Escott" },
+      { code: "CL105-18", id: 18, title: "Engaging multi-level stakeholders through creative facilitation",           speaker: "Pippa Heylings" },
+      { code: "CL105-19", id: 19, title: "Full day advocacy training workshop",                                       speaker: "Lucy Bjorck & Amelia Womack" },
+      { code: "CL105-20", id: 20, title: "Governance in conservation",                                                speaker: "Howard Nelson" },
+      { code: "CL105-21", id: 21, title: "Managing marine resources in areas beyond national jurisdiction",           speaker: "Ruth Fletcher" },
+      { code: "CL105-22", id: 22, title: "Conservation policies and multilateral environmental agreements",           speaker: "Martha Rojas" },
+      { code: "CL105-23", id: 23, title: "Decentralisation and the commons",                                          speaker: "Chris Sandbrook" },
+      { code: "CL105-24", id: 24, title: "CITES as a tool for managing the wildlife trade",                           speaker: "Paola Mosig Reidl" },
+      { code: "CL105-25", id: 25, title: "Coastal marine conservation",                                               speaker: "Jen Ashworth" },
+      { code: "CL105-26", id: 26, title: "Institutions and conservation policy",                                      speaker: "Peter Brotherton" },
+      { code: "CL105-27", id: 27, title: "Conservation governance, protected areas and OECMs",                        speaker: "Odacy Davis" },
+      { code: "CL105-28", id: 28, title: "Community-based and indigenous-led conservation",                           speaker: "Phoebe Ndiema" },
+      { code: "CL105-29", id: 29, title: "Environmental law in conservation",                                         speaker: "Babette Brophy" },
+      { code: "CL105-30", id: 30, title: "Managing partnerships",                                                     speaker: "Mike Rands" },
+      { code: "CL105-31", id: 31, title: "Module wrap-up",                                                            speaker: "Howard Nelson" },
+    ]
+  }
+};
+
+const LABELS = ["", "Poor", "Below average", "Average", "Good", "Excellent"];
+const STORAGE_PREFIX = "mphil_done_2627_";
+
+let selectedModule = null;
+let selectedId = null;
+let selectedRating = 0;
+let currentFilter = "all";
+
+function getDone(moduleCode) {
+  try { return JSON.parse(localStorage.getItem(STORAGE_PREFIX + moduleCode) || "[]"); }
+  catch(e) { return []; }
+}
+function markDone(moduleCode, id) {
+  const done = getDone(moduleCode);
+  if (!done.includes(id)) { done.push(id); localStorage.setItem(STORAGE_PREFIX + moduleCode, JSON.stringify(done)); }
+}
+
+function renderModules() {
+  const grid = document.getElementById("module-grid");
+  grid.innerHTML = Object.entries(MODULES).map(([code, mod]) => `
+    <button class="module-btn${selectedModule === code ? " selected" : ""}"
+      onclick="selectModule('${code}')" aria-pressed="${selectedModule === code}">
+      <div class="module-code">${code}</div>
+      <div class="module-name">${mod.label}</div>
+    </button>`).join("");
+}
+
+function selectModule(code) {
+  selectedModule = code;
+  selectedId = null;
+  selectedRating = 0;
+  currentFilter = "all";
+  renderModules();
+  document.getElementById("session-picker-label").textContent =
+    "Step 2 — Select your session (" + MODULES[code].label + ")";
+  document.getElementById("session-picker").style.display = "block";
+  document.getElementById("form-area").style.display = "none";
+  document.getElementById("selected-display").style.display = "none";
+  document.querySelectorAll(".filter-btn").forEach((b, i) => b.classList.toggle("active", i === 0));
+  buildStars();
+  renderList();
+  setTimeout(() => document.getElementById("session-picker").scrollIntoView({ behavior: "smooth", block: "nearest" }), 50);
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  el.classList.add("active");
+  renderList();
+}
+
+function renderList() {
+  if (!selectedModule) return;
+  const done = getDone(selectedModule);
+  const list = document.getElementById("session-list");
+  const sessions = MODULES[selectedModule].sessions;
+  const filtered = sessions.filter(s => {
+    if (currentFilter === "pending") return !done.includes(s.id);
+    if (currentFilter === "done") return done.includes(s.id);
+    return true;
+  });
+  if (!filtered.length) {
+    list.innerHTML = `<p class="empty-msg">No sessions in this category yet.</p>`;
+    return;
+  }
+  list.innerHTML = filtered.map(s => `
+    <button class="session-btn${selectedId === s.id ? " selected" : ""}${done.includes(s.id) ? " done" : ""}"
+      onclick="selectSession(${s.id})"
+      role="option" aria-selected="${selectedId === s.id}">
+      <span class="session-num">${s.id}</span>
+      <span class="session-info">
+        <span class="session-title">${s.title}</span>
+        <span class="session-speaker">${s.speaker}</span>
+      </span>
+      <span class="done-badge" aria-label="already rated">✓ Rated</span>
+    </button>`).join("");
+}
+
+function selectSession(id) {
+  selectedId = id;
+  selectedRating = 0;
+  renderList();
+  buildStars();
+  const s = MODULES[selectedModule].sessions.find(x => x.id === id);
+  const disp = document.getElementById("selected-display");
+  disp.style.display = "block";
+  disp.innerHTML = `<strong>${selectedModule}, session ${id}:</strong> ${s.title} — <em>${s.speaker}</em>`;
+  document.getElementById("submit-btn").disabled = true;
+  document.getElementById("q2").value = "";
+  document.getElementById("q3").value = "";
+  document.getElementById("submit-status").textContent = "";
+  const fa = document.getElementById("form-area");
+  fa.style.display = "block";
+  setTimeout(() => fa.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50);
+}
+
+function buildStars() {
+  const c = document.getElementById("stars");
+  c.innerHTML = [1,2,3,4,5].map(i =>
+    `<button class="star-btn${selectedRating >= i ? " active" : ""}"
+      onclick="setRating(${i})" aria-label="Rate ${i} out of 5">${i}</button>`
+  ).join("");
+  document.getElementById("star-label").textContent = selectedRating ? LABELS[selectedRating] : "";
+}
+
+function setRating(n) {
+  selectedRating = n;
+  buildStars();
+  document.getElementById("submit-btn").disabled = false;
+}
+
+async function submitFeedback() {
+  if (!selectedModule || !selectedId || !selectedRating) return;
+  const btn = document.getElementById("submit-btn");
+  const status = document.getElementById("submit-status");
+  const s = MODULES[selectedModule].sessions.find(x => x.id === selectedId);
+
+  btn.disabled = true;
+  btn.textContent = "Submitting…";
+  status.textContent = "";
+  status.classList.remove("error");
+
+  const payload = {
+    cohort: COHORT,
+    module: selectedModule,
+    session_code: s.code,
+    session_id: selectedId,
+    session_title: s.title,
+    session_speaker: s.speaker,
+    rating: selectedRating,
+    liked: document.getElementById("q2").value.trim(),
+    improvements: document.getElementById("q3").value.trim(),
+    submitted_at: new Date().toISOString()
+  };
+
+  if (SCRIPT_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+    console.log("Demo mode — payload:", payload);
+    await new Promise(r => setTimeout(r, 700));
+    markDone(selectedModule, selectedId);
+    showSuccess();
+    return;
+  }
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    markDone(selectedModule, selectedId);
+    showSuccess();
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = "Submit feedback";
+    status.textContent = "Submission failed — please check your connection and try again.";
+    status.classList.add("error");
+  }
+}
+
+function showSuccess() {
+  document.getElementById("main-view").style.display = "none";
+  document.getElementById("success-view").style.display = "block";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showMain() {
+  selectedModule = null;
+  selectedId = null;
+  selectedRating = 0;
+  currentFilter = "all";
+  ["q2","q3"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("submit-btn").disabled = true;
+  document.getElementById("submit-btn").textContent = "Submit feedback";
+  document.getElementById("submit-status").textContent = "";
+  document.getElementById("main-view").style.display = "block";
+  document.getElementById("success-view").style.display = "none";
+  document.getElementById("form-area").style.display = "none";
+  document.getElementById("selected-display").style.display = "none";
+  document.getElementById("session-picker").style.display = "none";
+  renderModules();
+  buildStars();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderModules();
+buildStars();
+</script>
+</body>
+</html>
